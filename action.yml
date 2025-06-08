@@ -1,0 +1,44 @@
+name: 'Upload SPA to Azure Blob'
+description: 'Deploys a frontend to Azure Blob and activates the index.html file at last'
+inputs:
+  connectionstring: 
+    required: true
+    type: string  
+  container:
+    required: true
+    type: string  
+  source:
+    required: true
+    type: string  
+    
+runs:
+  using: "composite"
+  steps:    
+    - name: Prepare upload without index.html
+      shell: bash
+      run: |
+        mkdir upload
+        rsync -av --exclude 'index.html' '${{ inputs.source }}' ./upload/
+
+    - name: Upload all without index.html to Azure Blob (pre-stage)
+      uses: azure/cli@v2
+      with:
+        inlineScript: |      
+          az storage blob upload-batch \
+            --connection-string '${{ inputs.connectionstring }}' \
+            --overwrite  \
+            --destination '${{ inputs.container }}' \
+            --source ./upload \
+
+    - name: Upload the index.html to Azure Blob (activation)
+      uses: azure/cli@v2      
+      with:
+        inlineScript: |      
+          az storage blob upload \
+            --connection-string '${{ inputs.connectionstring }}' \
+            --container-name '${{ inputs.container }}' \
+            --file ${{ inputs.source }}/index.html \
+            --name index.html \
+            --overwrite \
+            --content-type text/html \
+            --content-cache-control "no-cache"
