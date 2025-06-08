@@ -30,8 +30,7 @@ runs:
         
     - name: Prepare upload without index.html
       shell: bash
-      run: |
-        mkdir ${{ steps.uploadworkspace.outputs.upload_workspace }}
+      run: |        
         rsync -av --exclude 'index.html' '${{ inputs.source }}' "${{ steps.uploadworkspace.outputs.upload_workspace }}/"
 
     - name: Upload all without index.html to Azure Blob (pre-stage)
