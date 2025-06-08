@@ -18,11 +18,21 @@ inputs:
 runs:
   using: "composite"
   steps:    
+    - name: Create Upload Workspace
+      id: uploadworkspace
+      shell: bash
+      run: |
+        GUID=$(uuidgen)
+        UNIQUE_DIR="${RUNNER_TEMP}/${GUID}"
+        mkdir -p "$UNIQUE_DIR"
+        echo "Created: $UNIQUE_DIR"
+        echo "upload_workspace=$UNIQUE_DIR" >> "$GITHUB_OUTPUT"
+        
     - name: Prepare upload without index.html
       shell: bash
       run: |
-        mkdir upload
-        rsync -av --exclude 'index.html' '${{ inputs.source }}' ./upload/
+        mkdir ${{ steps.uploadworkspace.outputs.upload_workspace }}
+        rsync -av --exclude 'index.html' '${{ inputs.source }}' "${{ steps.uploadworkspace.outputs.upload_workspace }}/"
 
     - name: Upload all without index.html to Azure Blob (pre-stage)
       uses: azure/cli@v2
@@ -32,7 +42,7 @@ runs:
             --connection-string '${{ inputs.connectionstring }}' \
             --overwrite  \
             --destination '${{ inputs.container }}' \
-            --source ./upload \
+            --source ${{ steps.uploadworkspace.outputs.upload_workspace }} 
 
     - name: Upload the index.html to Azure Blob (activation)
       uses: azure/cli@v2      
