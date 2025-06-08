@@ -1,5 +1,9 @@
 name: 'Upload SPA to Azure Blob'
 description: 'Deploys a frontend to Azure Blob and activates the index.html file at last'
+author: 'CoreHelpers Project'
+branding:
+  icon: 'upload-cloud'
+  color: 'purple'
 inputs:
   connectionstring: 
     required: true
