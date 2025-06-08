@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: dei79/upload-spa-to-azure-blob@main
+      - uses: CoreHelpers/upload-spa-to-azure-blob@main
         with:
           connectionstring: ${{ secrets.ConnectionString }}
           container: publicweb
